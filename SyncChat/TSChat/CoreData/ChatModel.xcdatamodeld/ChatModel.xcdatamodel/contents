@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model userDefinedModelVersionIdentifier="" type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="5063" systemVersion="13D65" minimumToolsVersion="Xcode 4.3" macOSVersion="Automatic" iOSVersion="Automatic">
+    <entity name="Chat" representedClassName="Chat" syncable="YES">
+        <attribute name="direction" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="filenameAsSent" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="groupName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="groupNumber" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="hasMedia" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="isFileDownloaded" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="isGroupMessage" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="isNew" optional="YES" attributeType="Boolean" syncable="YES"/>
+        <attribute name="jidString" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="localfileName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="mediaType" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="messageBody" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="messageDate" optional="YES" attributeType="Date" syncable="YES"/>
+        <attribute name="messageStatus" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="mimeType" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="roomJID" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="roomName" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="senderName" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <entity name="Room" representedClassName="Room" syncable="YES">
+        <attribute name="name" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="roomJID" optional="YES" attributeType="String" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Chat" positionX="-99" positionY="99" width="128" height="315"/>
+        <element name="Room" positionX="268" positionY="81" width="128" height="73"/>
+    </elements>
+</model>

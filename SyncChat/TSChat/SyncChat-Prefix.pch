@@ -1,0 +1,83 @@
+//
+//  Prefix header
+//
+//  The contents of this file are implicitly included at the beginning of every source file.
+//
+
+#import <Availability.h>
+
+#ifndef __IPHONE_5_0
+#warning "This project uses features only available in iOS SDK 5.0 and later."
+#endif
+
+#ifdef __OBJC__
+
+#import <UIKit/UIKit.h>
+#import <Foundation/Foundation.h>
+#import "XMPPFramework.h"
+#import "ESSAppDelegate.h"
+#import "SyncService.h"
+#import "ESSHelper.h"
+
+//#define  kXMPPmyJID  @"kXMPPmyJID";
+//#define  kXMPPmyPassword  @"kXMPPmyPassword";
+
+//user info
+#define kXMPPmyJID  @"kXMPPmyJID"
+#define kXMPPmyPassword  @"kXMPPmyPassword"
+
+/*
+// Public IP
+#define HostName  @"182.73.73.181"//@"essadmins-macbook-pro.local"//
+#define kXMPPServer                     @"182.73.73.181"//@"essadmins-macbook-pro.local"//
+#define kxmppProxyServer            @"182.73.73.181" //@"essadmins-macbook-pro.local"//
+#define kxmppConferenceServer   @"conference.182.73.73.181"//@"conference.essadmins-macbook-pro.local"//
+#define kxmppSearchServer           @"search.182.73.73.181" //@"search.essadmins-macbook-pro.local"//
+*/
+
+/*
+
+//Local IP
+#define HostName                                @"essadmins-macbook-pro.local"//
+#define kXMPPServer                           @"essadmins-macbook-pro.local"//
+#define kxmppProxyServer                    @"essadmins-macbook-pro.local"//
+#define kxmppConferenceServer           @"conference.essadmins-macbook-pro.local"//
+#define kxmppSearchServer                   @"search.essadmins-macbook-pro.local"//
+*/
+
+#define profileImageSize 40
+#define profileSornerRadius 20
+#define messageTextFeildWidth 240
+#define messageFont @"Arial Rounded MT Bold"
+
+#define kxmppHTTPRegistrationUrl    @"http://essadmins-macbook-pro.local:9090/plugins/userService/userservice?type=add&secret=V3q2GdGx&username=%@&password=%@&name=%@&email=%@"
+/*
+#define HostName                    @"192.168.1.73"
+#define kXMPPServer                 @"192.168.1.73"
+#define kxmppProxyServer            @"192.168.1.73"
+#define kxmppConferenceServer       @"@conference.192.168.1.73"
+#define kxmppSearchServer           @"search.192.168.1.73"
+*/
+
+ //Public IP
+ #define HostName                                @"jabber.ru.com"//
+ #define kXMPPServer                           @"jabber.ru.com"//
+ #define kxmppProxyServer                    @"jabber.ru.com"//
+ #define kxmppConferenceServer           @"conference.jabber.ru.com"//
+ #define kxmppSearchServer                   @"search.jabber.ru.com"//
+
+//Notifications
+#define kChatStatus                 @"kChatStatus"
+#define kNewMessage                 @"kNewMessage"
+#define  kNewMessageForSYNC  @"kNewMessageSYNC"
+//YDConversationViewController
+#define lineHeight  16.0f
+#define maxChatLines 4
+
+//MUC
+#define kMyNickName                 @"Peter"
+//Storage
+#define USE_MEMORY_STORAGE 1
+#define USE_HYBRID_STORAGE 0
+
+#endif

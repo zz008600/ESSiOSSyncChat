@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>IDESourceControlProjectFavoriteDictionaryKey</key>
+	<false/>
+	<key>IDESourceControlProjectIdentifier</key>
+	<string>B61CCAAD-F644-40FD-A323-EAD1C3271559</string>
+	<key>IDESourceControlProjectName</key>
+	<string>SyncChat</string>
+	<key>IDESourceControlProjectOriginsDictionary</key>
+	<dict>
+		<key>8EC30B97-9373-45F7-A885-F38D3180AF73</key>
+		<string>https://192.168.1.236/svn/MobilityApps/trunk/SyncChat/iOS</string>
+		<key>E994A4E9-8414-4F4F-ABD3-BCC9EE9567C0</key>
+		<string>https://github.com/robbiehanson/XMPPFramework.git</string>
+	</dict>
+	<key>IDESourceControlProjectPath</key>
+	<string>SyncChat/SyncChat.xcodeproj/project.xcworkspace</string>
+	<key>IDESourceControlProjectRelativeInstallPathDictionary</key>
+	<dict>
+		<key>8EC30B97-9373-45F7-A885-F38D3180AF73</key>
+		<string>../../..</string>
+		<key>E994A4E9-8414-4F4F-ABD3-BCC9EE9567C0</key>
+		<string>../../TSChat/XMPP</string>
+	</dict>
+	<key>IDESourceControlProjectRepositoryRootDictionary</key>
+	<dict>
+		<key>8EC30B97-9373-45F7-A885-F38D3180AF73</key>
+		<string>https://192.168.1.236/svn/MobilityApps</string>
+	</dict>
+	<key>IDESourceControlProjectURL</key>
+	<string>https://192.168.1.236/svn/MobilityApps/trunk/SyncChat/iOS/SyncChat/SyncChat.xcodeproj</string>
+	<key>IDESourceControlProjectVersion</key>
+	<integer>110</integer>
+	<key>IDESourceControlProjectWCCIdentifier</key>
+	<string>8EC30B97-9373-45F7-A885-F38D3180AF73</string>
+	<key>IDESourceControlProjectWCConfigurations</key>
+	<array>
+		<dict>
+			<key>IDESourceControlRepositoryBranchesRelativeLocationKey</key>
+			<string>branches</string>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.subversion</string>
+			<key>IDESourceControlRepositoryTagsRelativeLocationKey</key>
+			<string>tags</string>
+			<key>IDESourceControlRepositoryTrunkRelativeLocationKey</key>
+			<string>trunk</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>8EC30B97-9373-45F7-A885-F38D3180AF73</string>
+			<key>IDESourceControlWCCName</key>
+			<string>ESSSyncChat</string>
+		</dict>
+		<dict>
+			<key>IDESourceControlRepositoryExtensionIdentifierKey</key>
+			<string>public.vcs.git</string>
+			<key>IDESourceControlWCCIdentifierKey</key>
+			<string>E994A4E9-8414-4F4F-ABD3-BCC9EE9567C0</string>
+			<key>IDESourceControlWCCName</key>
+			<string>XMPP</string>
+		</dict>
+	</array>
+</dict>
+</plist>
