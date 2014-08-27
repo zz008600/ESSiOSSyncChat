@@ -15,7 +15,7 @@
 #import "FTPManager.h"
 #import "SyncPlayerPlugin.h"
 
-@interface ESSHomeViewController : ESSMainViewController<UITableViewDataSource,UITableViewDelegate,UITextFieldDelegate,UIActionSheetDelegate,FTPConnectionManagerDelegate>{
+@interface ESSHomeViewController : ESSMainViewController<UITableViewDataSource,UITableViewDelegate,UITextFieldDelegate,UIActionSheetDelegate>{
     UIView * chat_View;
     UITableView * chat_table;
     UITextField * messageText;
@@ -25,7 +25,7 @@
     UIView * frind_list;
     BOOL isSideViewHide;
   //  ESSBuddyListViewController * frndList;
-    UIView * botomView;
+    UIView * bottomView;
     
     //FTP Connection
     FTPConnectionManager *ftpManager;

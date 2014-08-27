@@ -38,4 +38,6 @@
 + (NSMutableDictionary *)makeJSONForTextSending:(NSString *)text type:(NSString *)type;
 + (ESSJsonMessageModal *)getURLFromJSON:(NSMutableDictionary *)dict;
 + (ESSJsonMessageModal *)getTextFromJSON:(NSMutableDictionary *)dict;
++ (NSString *)fileNameFromFilePath:(NSString *)filePath;
++ (NSString *)mimeType:(NSString *)fileName;
 @end

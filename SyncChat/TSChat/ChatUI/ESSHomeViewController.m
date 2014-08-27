@@ -14,7 +14,7 @@
 #import "NSString+Emotion.h"
 #import  "ESSMediaViewController.h"
 
-@interface ESSHomeViewController ()<UIImagePickerControllerDelegate>{
+@interface ESSHomeViewController ()<UIImagePickerControllerDelegate,AVAudioRecorderDelegate>{
     UIImagePickerController *picturePicker;
     NSString *fileNameToBeUploaded;
     BOOL filesendingInProgress;
@@ -25,6 +25,14 @@
     AVPlayer *player;
     BOOL isPlaying;
     UISlider *playbackProgress;
+    UILabel *trackCompleted;
+    UILabel *trackRemain;
+    
+    
+    //Record Voice Message
+    AVAudioRecorder *recorder;
+    NSString *recordedMessageFilePath;
+    UIView *recordingView;
 }
 //ch.07
 @property (nonatomic,strong) ESSFileSender *fileSender;
@@ -78,6 +86,7 @@
 {
     [super viewDidLoad];
     isSendMessage = NO;
+    isRecording = YES;
     
     [[NSNotificationCenter defaultCenter]addObserver:self
                                             selector:@selector(NavigateToSync:)
@@ -96,6 +105,12 @@
     
     self.navigationItem.leftBarButtonItem=[self backButton];
     [self.navigationItem setRightBarButtonItem:[ESSHelper loggedInUserProfileImageBarButton]];
+    
+    [self conversationView];
+    
+}
+
+- (void)conversationView{
     chat_View = [[UIView alloc] initWithFrame:self.view.frame];
     chat_View.backgroundColor=[UIColor clearColor];
     [self.view addSubview:chat_View];
@@ -111,34 +126,35 @@
     chat_table.sectionIndexTrackingBackgroundColor=[UIColor clearColor];
     [chat_View addSubview:chat_table];
     
-    botomView=[[UIView alloc]initWithFrame:CGRectMake(0,self.view.frame.size.height-35, self.view.frame.size.width,40 )];
-    botomView.backgroundColor=[ESSMainViewController colorWithHexString:@"#BBDAEC"]; //[UIColor blueColor];
+    bottomView=[[UIView alloc]initWithFrame:CGRectMake(0,self.view.frame.size.height-35, self.view.frame.size.width,40 )];
+    bottomView.backgroundColor=[ESSMainViewController colorWithHexString:@"#BBDAEC"]; //[UIColor blueColor];
     messageText=[[UITextField alloc] initWithFrame:CGRectMake(30,2, self.view.frame.size.width-70,30 )];
     messageText.backgroundColor=[UIColor whiteColor];
     messageText.borderStyle=UITextBorderStyleRoundedRect;
     messageText.delegate=self;
     messageText.returnKeyType = UIReturnKeySend;
-    [botomView addSubview:messageText];
+    [bottomView addSubview:messageText];
     share=[[UIButton alloc] initWithFrame:CGRectMake( self.view.frame.size.width - 30 ,2, 30,30 )];
     [share setImage:[UIImage imageNamed:@"record.png"] forState:UIControlStateNormal];
     [share addTarget:self action:@selector(send:) forControlEvents:UIControlEventTouchUpInside];
-    [botomView addSubview:share];
+    [bottomView addSubview:share];
     
     
     upload=[[UIButton alloc] initWithFrame:CGRectMake( 0 ,2, 30,30 )];
     [upload setImage:[UIImage imageNamed:@"upload-128.png"] forState:UIControlStateNormal];
     [upload addTarget:self action:@selector(uploadFile:) forControlEvents:UIControlEventTouchUpInside];
-    [botomView addSubview:upload];
-    [chat_View addSubview:botomView];
+    [bottomView addSubview:upload];
+    [chat_View addSubview:bottomView];
     frind_list =[ [UIView alloc] initWithFrame:CGRectMake(-(self.view.frame.size.width - 100) ,0, self.view.frame.size.width - 100,self.view.frame.size.height )];
     frind_list.backgroundColor=[UIColor colorWithPatternImage:[UIImage imageNamed:@"3D-Background1.jpg"]];
+
 }
-
-
 #pragma mark - Message Send Method
 - (IBAction)send:(id)sender{
     if (isRecording) {
-        
+        [self recordMessageVeiw];
+      
+       // [ESSHelper showAlertWithTitle:@"Recording" andMessage:@"Record Message"];
         
     }
     else
@@ -147,13 +163,14 @@
         [messageStr substituteEmoticons];
         if([messageStr length] > 0)
         {
-            NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+            NSXMLElement *body = [NSXMLElement elementWithName:@"body"];
+           /* NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
             NSString *documentsDirectory = [paths objectAtIndex:0];
             
             //send chat message
             NSArray *strArr = [messageStr componentsSeparatedByString:@"/"];
             NSLog(@"%@",strArr);
-            NSXMLElement *body = [NSXMLElement elementWithName:@"body"];
+           
             if ([messageStr rangeOfString:documentsDirectory].location != NSNotFound)
             {
 #if TARGET_IPHONE_SIMULATOR
@@ -167,7 +184,13 @@
             }
             else
                 [body setStringValue:messageStr];
-            
+            */
+            NSArray *strArray = [[ESSHelper fileNameFromFilePath:messageStr] componentsSeparatedByString:@"."];
+            if ([strArray count]==2) {
+                [body setStringValue:[ESSHelper fileNameFromFilePath:messageStr]];
+            }else{
+               [body setStringValue:messageStr];
+            }
             
             NSXMLElement *message = [NSXMLElement elementWithName:@"message"];
             [message addAttributeWithName:@"type" stringValue:@"chat"];
@@ -190,17 +213,17 @@
                           insertNewObjectForEntityForName:@"Chat"
                           inManagedObjectContext:[ESSHelper appDelegate].managedObjectContext];
             
-            
-            if ([messageStr rangeOfString:documentsDirectory].location != NSNotFound)
+            if ([strArray count]==2)
+           // if ([messageStr rangeOfString:documentsDirectory].location != NSNotFound)
             {
                 chat.messageDate = [NSDate date];
                 chat.hasMedia=[NSNumber numberWithBool:YES];
                 chat.isNew=[NSNumber numberWithBool:NO];
                 chat.messageStatus=@"send";
                 chat.direction = @"OUT";
-                chat.mimeType = [ESSHelper mediaType:messageStr];
+                chat.mimeType = [ESSHelper mimeType:messageStr];
                 chat.mediaType = [ESSHelper mediaType:messageStr];
-                chat.filenameAsSent = messageStr;
+                chat.filenameAsSent = messageStr;// [ESSHelper fileNameFromFilePath:messageStr];
                 chat.isFileDownloaded = [NSNumber numberWithBool:YES];
             }
             else
@@ -262,6 +285,7 @@
         if(!isSendMessage){
             [self send:nil];
             isSendMessage = YES;
+            isRecording = YES;
         }
     }];
     return YES;
@@ -275,6 +299,7 @@
         self.view.frame=CGRectMake(self.view.frame.origin.x,self.view.frame.origin.y-215,self.view.frame.size.width, self.view.frame.size.height);
     } completion:^(BOOL finished){
         isSendMessage = NO;
+        isRecording = NO;
     }];
     
 }
@@ -397,33 +422,39 @@
     UIView * messageView = [[UIView alloc] init];
     //UIView * messageView= [[UIView alloc] initWithFrame:CGRectMake(0 ,45, 200, downLoadImage.frame.size.height )];
     
-    if ([alingment isEqualToString:@"left"]) {
+    if ([alingment isEqualToString:@"left"] ) {
         timeLabel.textAlignment=NSTextAlignmentLeft;
         downloadIcon.hidden=NO;
-        if ([fType isEqualToString:@"image"]) {
+        if ([fType isEqualToString:@"image"]&& [obj.isFileDownloaded intValue]==1) {
             messageView.frame =CGRectMake(0 ,45, 200, downLoadImage.frame.size.height );
             downLoadImage.frame=CGRectMake(5 , 0, downLoadImage.frame.size.width, downLoadImage.frame.size.height);
             downloadIcon.frame =CGRectMake(5 ,0, downloadIcon.frame.size.width, downloadIcon.frame.size.height);
             [messageView addSubview:downLoadImage];
-        }else if([fType isEqualToString:@"audio"]){
+            [messageView addSubview:downloadIcon];
+          
+        }else if([fType isEqualToString:@"audio"] && [obj.isFileDownloaded intValue]==1){
            
             UIView *audio =  [self audioPlayer:filePath dataIndex:index];
             audio.frame = CGRectMake(5 ,0, audio.frame.size.width, audio.frame.size.height);
             timeLabel.frame = CGRectMake(0,audio.frame.size.height + 5 ,320,10);
             messageView.frame =CGRectMake(0 ,45, 200, audio.frame.size.height );
             [messageView addSubview:audio];
+        }else{
+            messageView.frame =CGRectMake(0 ,45, 200, downLoadImage.frame.size.height );
+            downloadIcon.frame =CGRectMake(0,5,100,100);
+            [messageView addSubview:downloadIcon];
         }
     }else{
         timeLabel.textAlignment=NSTextAlignmentRight;
-        downloadIcon.hidden=YES;
-        if ([fType isEqualToString:@"audio"]) {
+        downloadIcon.hidden=NO;
+        if ([fType isEqualToString:@"image"]) {
             downLoadImage.frame=CGRectMake(self.view.frame.size.width-downLoadImage.frame.size.width-5 , 0, downLoadImage.frame.size.width, downLoadImage.frame.size.height);
             
             downloadIcon.frame =CGRectMake(self.view.frame.size.width-downloadIcon.frame.size.width-5 , 0, downloadIcon.frame.size.width, downloadIcon.frame.size.height);
             [downloadIcon setBackgroundColor:[UIColor redColor]];
             messageView.frame =CGRectMake(0 ,45, 200, downLoadImage.frame.size.height );
             [messageView addSubview:downLoadImage];
-        }else if([fType isEqualToString:@"image"]){
+        }else if([fType isEqualToString:@"audio"]){
             
            UIView *audio =  [self audioPlayer:filePath dataIndex:index];
             audio.frame = CGRectMake(self.view.frame.size.width-audio.frame.size.width-5 , 0, audio.frame.size.width, audio.frame.size.height);
@@ -438,7 +469,6 @@
     
     
   
-    [messageView addSubview:downloadIcon];
     [messageView addSubview:timeLabel];
     return  messageView;
 }
@@ -446,7 +476,7 @@
 - (UIView *)audioPlayer:(NSString *)filePath dataIndex:(int)index{
     isPlaying = NO;
    // [self audioPlayerSetup:filePath];
-    UIView *playerMedia= [[UIView alloc]initWithFrame:CGRectMake(0, 0, 200, 40)];
+    UIView *playerMedia= [[UIView alloc]initWithFrame:CGRectMake(0, 0, 262, 40)];
     playerMedia.backgroundColor =[ESSMainViewController colorWithHexString:@"#BBDAEC"];
     playerMedia.clipsToBounds = YES;
     playerMedia.layer.cornerRadius = profileSornerRadius;
@@ -458,22 +488,35 @@
     [button setImage:[UIImage imageNamed:@"player_play.png"] forState:UIControlStateNormal];
     button.frame = CGRectMake(5.0, 4, 32.0, 32.0);
     [playerMedia addSubview:button];
+    trackRemain = [[UILabel alloc] initWithFrame:CGRectMake(40, 10, 40, 20)];
+    trackRemain.tag = index;
+    trackRemain.text = @"00.00";
+    trackRemain.font = [UIFont fontWithName:messageFont size:14];
+    trackRemain.textColor =[ESSMainViewController colorWithHexString:@"#535456"];
+    [playerMedia addSubview:trackRemain];
     
-    CGRect frame = CGRectMake(button.frame.size.width+5, 15, 140 , 10.0);
+    
+    CGRect frame = CGRectMake(80, 15, 140 , 10.0);
     playbackProgress = [[UISlider alloc] initWithFrame:frame];
     playbackProgress.tag = index;
     [playbackProgress addTarget:self action:@selector(sliderValueChangedAction:) forControlEvents:UIControlEventValueChanged];
     [playbackProgress setBackgroundColor:[UIColor clearColor]];
     [playerMedia addSubview:playbackProgress];
+    trackCompleted = [[UILabel alloc] initWithFrame:CGRectMake(220,10, 40, 20)];
+    trackCompleted.tag = index;
+    trackCompleted.text = @"00.00";
+    trackCompleted.font = [UIFont fontWithName:messageFont size:14];
+    trackCompleted.textColor =[ESSMainViewController colorWithHexString:@"#535456"];
+    [playerMedia addSubview:trackCompleted];
+
+    
     return playerMedia;
 }
 
-- (void)audioPlayerSetup:(NSString *)filePath{
-}
 - (void)mediaPlayPause:(id)sender{
     NSLog(@"Button Prees");
     UIButton *btn = (UIButton *)sender;
-   // Chat *obj = [_chats objectAtIndex:btn.tag];
+    Chat *obj = [_chats objectAtIndex:btn.tag];
    // [[SyncPlayerPlugin sharedMPInstance] playMediaFile:obj.localfileName];
     
 
@@ -484,29 +527,35 @@
         //[btn setTitle:@"Play" forState:UIControlStateNormal];
         isPlaying = NO;
     }else{
-        [[SyncPlayerPlugin sharedMPInstance] playMediaFile:@"Againandagain"];
-        [[SyncPlayerPlugin sharedMPInstance].player play];
-        [btn setImage:[UIImage imageNamed:@"player_pause.png"] forState:UIControlStateNormal];
+        [[SyncPlayerPlugin sharedMPInstance] playMediaFile:obj.localfileName];
+        
+        
         [NSTimer scheduledTimerWithTimeInterval:0.5
                                          target:self
                                        selector:@selector(playbackProgressBar:)
-                                       userInfo:nil
+                                       userInfo:btn
                                         repeats:YES];
+        [[SyncPlayerPlugin sharedMPInstance].player play];
+        [btn setImage:[UIImage imageNamed:@"player_pause.png"] forState:UIControlStateNormal];
         //[btn setTitle:@"Pause" forState:UIControlStateNormal];
         isPlaying = YES;
     }
 }
 // Method to change the state ot Track timer Slider value to song  current time and chnege the trackCompleted and trackRemaing Lable text
--(void)playbackProgressBar:(NSTimer*)timer{
+-(void)playbackProgressBar:(NSTimer *)sender{
     
+    UIButton *btn = (UIButton *)sender.userInfo;
     CMTime total= [SyncPlayerPlugin sharedMPInstance].player.currentItem.asset.duration;
     CMTime currentTime= [SyncPlayerPlugin sharedMPInstance].player.currentItem.currentTime;
     float totalSeconds = CMTimeGetSeconds(total);
     float currentTimeSeconds = CMTimeGetSeconds(currentTime);
     float f=currentTimeSeconds / totalSeconds;
-    playbackProgress.value=f;
-    //trackCompleted.text=[NSString stringWithFormat:@"%.2f",currentTimeSeconds/ 60];
-    //trackRemain.text=[NSString stringWithFormat:@"%.2f",(currentTimeSeconds-totalSeconds)/ 60];
+    if (playbackProgress.tag == btn.tag){
+        playbackProgress.value=f;
+        trackCompleted.text=[NSString stringWithFormat:@"%.2f",currentTimeSeconds/ 60];
+        trackRemain.text=[NSString stringWithFormat:@"%.2f",(currentTimeSeconds-totalSeconds)/ 60];
+    }
+    
 }
 
 // Button action when user drag the slider position
@@ -528,6 +577,8 @@
     CMTime seekingCM = CMTimeMake(trackTime, 1);
     [player seekToTime:seekingCM];
 }
+
+
 
 -(UIView *)messageContainer:(NSString *)message  senderUserName:(NSString *)senderName  time:(NSString *)time  profileImage:(UIImage *)image aligment:(NSString *)alingment isFile:(BOOL)isFile fileType:(NSString *)fType buttonIndex:(int)index{
     UIView * profileImage =   [self getProfileImageView:image];
@@ -740,10 +791,11 @@
 
 
 - (IBAction)uploadFile:(id)sender{
-    
+    isRecording = NO;
     UIActionSheet *popup = [[UIActionSheet alloc] initWithTitle:@"Select Photo/Media file from :" delegate:self cancelButtonTitle:@"Cancel" destructiveButtonTitle:nil otherButtonTitles:
                             @"Album",
                             @"Camera",
+                            @"Audio",
                             nil];
     popup.tag = 1;
     [popup showInView:[UIApplication sharedApplication].keyWindow];
@@ -761,6 +813,7 @@
                     [self fileFromCamera];
                     break;
                 case 2:
+                    [self uploadMediaFile];
                     //[self emailContent];
                     break;
                 case 3:
@@ -810,6 +863,12 @@
         }
     }
 }
+
+- (void)uploadMediaFile{
+    NSString *path =[[[NSBundle mainBundle] resourcePath] stringByAppendingPathComponent:@"Againandagain.mp3"];
+    NSLog(@"%@",path);
+    [[FTPManager sharedInstance] sendAction:path];
+}
 #pragma mark UIImpagePicker Delegate
 - (void) imagePickerController:(UIImagePickerController *)picker didFinishPickingMediaWithInfo:(NSDictionary *)info
 {
@@ -844,7 +903,7 @@
 
 
 -(void)sendImageNameTotheUser:(NSNotification *)filePath{
-    messageText.text = (NSString *)[filePath object];
+    messageText.text =(NSString *)[filePath object] ;
     NSLog(@"%@",messageText.text);
     [self send:nil];
 }
@@ -855,8 +914,8 @@
     if ([obj.localfileName length]<25) {
         [AQActivityIndicator sharedInstance:@""];
         [AQActivityIndicator showIndicatorInView:(UIButton *)sender];
-        //[[FTPManager sharedInstance]getOrCancelAction:obj.localfileName];
-        [[FTPManager sharedInstance]getOrCancelAction:@"2014-08-16 14-43-12.wav"];
+        [[FTPManager sharedInstance]getOrCancelAction:obj.localfileName];
+        //[[FTPManager sharedInstance]getOrCancelAction:@"2014-08-16 14-43-12.wav"];
     }else{
         [self performSegueWithIdentifier:@"segueToMedia" sender:obj.localfileName];
     }
@@ -909,6 +968,7 @@
         if ([thisChat.localfileName  isEqualToString:objTemp.localfileName]){//
             thisChat.isFileDownloaded = [NSNumber numberWithBool:YES];
             thisChat.localfileName = filePath;
+            NSLog(@"Status : %@",thisChat.isFileDownloaded);
             
         }
     }
@@ -922,5 +982,104 @@
     [self scrollToBottomAnimated:YES];
 }
 
+#pragma mark - Record Message
+
+- (void)recordMessageVeiw{
+    [bottomView removeFromSuperview];
+    static int x = 0;
+    UIButton *record;
+    recordingView = [[UIView alloc]initWithFrame:CGRectMake(0,self.view.frame.size.height-35, self.view.frame.size.width,40 )];
+    record=[[UIButton alloc] initWithFrame:CGRectMake( self.view.frame.size.width - 30 ,2, 30,30 )];
+    [record setImage:[UIImage imageNamed:@"record.png"] forState:UIControlStateNormal];
+    [record addTarget:self action:@selector(recordPauseTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [recordingView addSubview:record];
+    
+    UIButton *stop;
+    recordingView = [[UIView alloc]initWithFrame:CGRectMake(0,self.view.frame.size.height-35, self.view.frame.size.width,40 )];
+    stop=[[UIButton alloc] initWithFrame:CGRectMake( 5 ,2, 30,30 )];
+    [stop setImage:[UIImage imageNamed:@"record.png"] forState:UIControlStateNormal];
+    [stop addTarget:self action:@selector(stopTapped:) forControlEvents:UIControlEventTouchUpInside];
+    [recordingView addSubview:stop];
+    
+    [self.view addSubview:recordingView];
+    [self recordVoiceMessage];
+    NSLog(@"%i",x++);
+}
+
+- (void)recordVoiceMessage{
+    
+    // Set the audio file
+    
+    NSString *fname = [ESSHelper createUniqueFileNameWithoutExtension];
+    NSString  *m4aPath = [NSHomeDirectory() stringByAppendingPathComponent:[NSString stringWithFormat:@"/Documents/%@.m4a",fname]];
+    recordedMessageFilePath = [m4aPath copy];
+    /*  NSArray *pathComponents = [NSArray arrayWithObjects:
+     [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject],
+     @"MyAudioMemo.m4a",
+     nil];*/
+    NSURL *outputFileURL = [NSURL fileURLWithPath:m4aPath];
+    
+    // Setup audio session
+    AVAudioSession *session = [AVAudioSession sharedInstance];
+    [session setCategory:AVAudioSessionCategoryPlayAndRecord error:nil];
+    
+    // Define the recorder setting
+    NSMutableDictionary *recordSetting = [[NSMutableDictionary alloc] init];
+    
+    [recordSetting setValue:[NSNumber numberWithInt:kAudioFormatMPEG4AAC] forKey:AVFormatIDKey];
+    [recordSetting setValue:[NSNumber numberWithFloat:44100.0] forKey:AVSampleRateKey];
+    [recordSetting setValue:[NSNumber numberWithInt: 2] forKey:AVNumberOfChannelsKey];
+    
+    // Initiate and prepare the recorder
+    recorder = [[AVAudioRecorder alloc] initWithURL:outputFileURL settings:recordSetting error:NULL];
+    recorder.delegate = self;
+    recorder.meteringEnabled = YES;
+    [recorder prepareToRecord];
+}
+
+- (IBAction)recordPauseTapped:(id)sender {
+    // Stop the audio player before recording
+    UIButton *btn = (UIButton *)sender;
+    if (isPlaying) {
+        [[SyncPlayerPlugin sharedMPInstance].player pause];
+    }
+    
+    if (!recorder.recording) {
+        AVAudioSession *session = [AVAudioSession sharedInstance];
+        [session setActive:YES error:nil];
+        
+        // Start recording
+        [recorder record];
+        [btn setImage:[UIImage imageNamed:@"player_pause.png"] forState:UIControlStateNormal];
+        
+    } else {
+        
+        // Pause recording
+        [recorder pause];
+        [btn setImage:[UIImage imageNamed:@"record.png"] forState:UIControlStateNormal];
+
+    }
+}
+
+- (IBAction)stopTapped:(id)sender {
+    [recorder stop];
+    
+    AVAudioSession *audioSession = [AVAudioSession sharedInstance];
+    [audioSession setActive:NO error:nil];
+}
+/* audioRecorderDidFinishRecording:successfully: is called when a recording has been finished or stopped. This method is NOT called if the recorder is stopped due to an interruption. */
+- (void)audioRecorderDidFinishRecording:(AVAudioRecorder *)recorder successfully:(BOOL)flag{
+    if (flag) {
+        isRecording = NO;
+        [[FTPManager sharedInstance] sendAction:recordedMessageFilePath];
+    }
+    [recordingView removeFromSuperview];
+    [self.view addSubview:bottomView];
+}
+
+/* if an error occurs while encoding it will be reported to the delegate. */
+- (void)audioRecorderEncodeErrorDidOccur:(AVAudioRecorder *)recorder error:(NSError *)error{
+    isRecording = NO;
+}
 
 @end

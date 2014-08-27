@@ -14,6 +14,7 @@
 
 #import <UIKit/UIKit.h>
 #import <Foundation/Foundation.h>
+#import <MobileCoreServices/MobileCoreServices.h>
 #import "XMPPFramework.h"
 #import "ESSAppDelegate.h"
 #import "SyncService.h"
@@ -35,7 +36,7 @@
 #define kxmppSearchServer           @"search.182.73.73.181" //@"search.essadmins-macbook-pro.local"//
 */
 
-/*
+
 
 //Local IP
 #define HostName                                @"essadmins-macbook-pro.local"//
@@ -43,7 +44,7 @@
 #define kxmppProxyServer                    @"essadmins-macbook-pro.local"//
 #define kxmppConferenceServer           @"conference.essadmins-macbook-pro.local"//
 #define kxmppSearchServer                   @"search.essadmins-macbook-pro.local"//
-*/
+
 
 #define profileImageSize 40
 #define profileSornerRadius 20
@@ -58,14 +59,14 @@
 #define kxmppConferenceServer       @"@conference.192.168.1.73"
 #define kxmppSearchServer           @"search.192.168.1.73"
 */
-
+/*
  //Public IP
  #define HostName                                @"jabber.ru.com"//
  #define kXMPPServer                           @"jabber.ru.com"//
  #define kxmppProxyServer                    @"jabber.ru.com"//
  #define kxmppConferenceServer           @"conference.jabber.ru.com"//
  #define kxmppSearchServer                   @"search.jabber.ru.com"//
-
+*/
 //Notifications
 #define kChatStatus                 @"kChatStatus"
 #define kNewMessage                 @"kNewMessage"

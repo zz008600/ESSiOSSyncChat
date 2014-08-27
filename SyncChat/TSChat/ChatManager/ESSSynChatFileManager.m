@@ -7,7 +7,7 @@
 //
 
 #import "ESSSynChatFileManager.h"
-#import <MobileCoreServices/MobileCoreServices.h>
+
 
 @implementation ESSSynChatFileManager
 

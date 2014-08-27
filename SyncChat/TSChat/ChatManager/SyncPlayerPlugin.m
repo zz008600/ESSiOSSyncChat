@@ -17,10 +17,10 @@
     
     self = [super initWithNibName:nibNameOrNil bundle:nibBundleOrNil];
     if (self) {
-            _currentSongIndex=-1;
-            volumeControl=0.5;
-            self.player = [[AVPlayer alloc] init];
-       
+        _currentSongIndex=-1;
+        volumeControl=0.5;
+        self.player = [[AVPlayer alloc] init];
+        
         // Registers this class as the delegate of the audio session.
         [[AVAudioSession sharedInstance] setDelegate: self];
         NSError *setCategoryError = nil;
@@ -59,13 +59,13 @@ static SyncPlayerPlugin *getInstance = NULL;
 
 -(NSArray *)getMediaFilesList{
     
-    #if TARGET_IPHONE_SIMULATOR
+#if TARGET_IPHONE_SIMULATOR
     NSMutableArray *arrayData = [[NSMutableArray alloc] init];
     [arrayData addObject:@"Again and again"];
     [arrayData addObject:@"Bandits in the Woods - Boston Strangler"];
-   return arrayData;
+    return arrayData;
     
-    #else
+#else
     NSMutableArray *sortedSongs = [[NSMutableArray alloc] init];
     MPMediaQuery *albums = [MPMediaQuery albumsQuery];
     NSArray* albumObjects = [albums collections];
@@ -76,7 +76,7 @@ static SyncPlayerPlugin *getInstance = NULL;
     }
     return sortedSongs;
     
-    #endif
+#endif
 }
 
 // Play / Pause AUDIO file track
@@ -84,17 +84,18 @@ static SyncPlayerPlugin *getInstance = NULL;
     
     if([_player rate] !=0.0){
         [_player pause];
-          return FALSE;
+        return FALSE;
     }else{
         if (_currentSongIndex==-1) {
-             [self playTrackForIndex:0];
+            [self playTrackForIndex:0];
         }else{
-             [_player play];
+            [_player play];
         }
-       
-          return TRUE;
+        
+        
+        return TRUE;
     }
-  
+    
 }
 
 
@@ -143,7 +144,7 @@ static SyncPlayerPlugin *getInstance = NULL;
 -(BOOL)nextSong{
     if(self.currentSongIndex + 1 <[[self getMediaFilesList] count] ){
         self.currentSongIndex=self.currentSongIndex+1;
- 
+        
     }else{
         self.currentSongIndex=0;
     }
@@ -158,26 +159,26 @@ static SyncPlayerPlugin *getInstance = NULL;
     
     if(songIndex<[[self getMediaFilesList] count] ){
         self.currentSongIndex=songIndex;
-        #if TARGET_IPHONE_SIMULATOR
-          NSURL * url = [[NSBundle mainBundle] URLForResource:[[self getMediaFilesList] objectAtIndex:songIndex] withExtension:@"mp3"];
+#if TARGET_IPHONE_SIMULATOR
+        NSURL * url = [[NSBundle mainBundle] URLForResource:[[self getMediaFilesList] objectAtIndex:songIndex] withExtension:@"mp3"];
         
-            NSLog(@"%@",url);
+        NSLog(@"%@",url);
         
-         self.currentItem = [AVPlayerItem playerItemWithURL:url];
-     
+        self.currentItem = [AVPlayerItem playerItemWithURL:url];
+        
         [self.player replaceCurrentItemWithPlayerItem:self.currentItem];
         [self.player play];
         
-        #else
+#else
         
-            MPMediaItem *song =[[self getMediaFilesList] objectAtIndex:songIndex];
-         self.currentItem = [AVPlayerItem playerItemWithURL:[song valueForProperty:MPMediaItemPropertyAssetURL]];
-            NSLog(@"%@",[song valueForProperty:MPMediaItemPropertyAssetURL]);
-      
+        MPMediaItem *song =[[self getMediaFilesList] objectAtIndex:songIndex];
+        self.currentItem = [AVPlayerItem playerItemWithURL:[song valueForProperty:MPMediaItemPropertyAssetURL]];
+        NSLog(@"%@",[song valueForProperty:MPMediaItemPropertyAssetURL]);
+        
         [self.player replaceCurrentItemWithPlayerItem:self.currentItem];
         [self.player play];
         
-        #endif
+#endif
         
         return TRUE;
     }else{
@@ -187,14 +188,13 @@ static SyncPlayerPlugin *getInstance = NULL;
 
 //  Play Song for given track index
 -(void)playMediaFile:(NSString *)mediaFilePath{
-        NSURL * url = [[NSBundle mainBundle] URLForResource:mediaFilePath withExtension:@"mp3"];
-        
-        NSLog(@"%@",url);
-        
-        self.currentItem = [AVPlayerItem playerItemWithURL:url];
-        
-        [self.player replaceCurrentItemWithPlayerItem:self.currentItem];
-        //[self.player play];
+    NSURL * url = [[NSURL alloc] initFileURLWithPath:mediaFilePath];//[[NSBundle mainBundle] URLForResource:mediaFilePath withExtension:@"mp3"];
+    NSLog(@"%@",url);
+    
+    self.currentItem = [AVPlayerItem playerItemWithURL:url];
+    
+    [self.player replaceCurrentItemWithPlayerItem:self.currentItem];
+    //[self.player play];
 }
 
 // Volume Increse
@@ -202,25 +202,25 @@ static SyncPlayerPlugin *getInstance = NULL;
     
     NSLog(@"volumeControl:%f   volume:%f ",volumeControl,volume);
     if (volumeControl <= 1.0){
-      
+        
         volumeControl=volumeControl+volume;
         
         NSURL * url = [[NSBundle mainBundle] URLForResource:[[self getMediaFilesList] objectAtIndex:_currentSongIndex] withExtension:@"mp3"];
-    
+        
         AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
         NSArray *audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
-    
+        
         NSMutableArray *allAudioParams = [NSMutableArray array];
         
-            for (AVAssetTrack *track in audioTracks) {
-                    AVMutableAudioMixInputParameters *audioInputParams =[AVMutableAudioMixInputParameters audioMixInputParameters];
-                    [audioInputParams setVolume:volumeControl atTime:kCMTimeZero];
-                    [audioInputParams setTrackID:[track trackID]];
-                    [allAudioParams addObject:audioInputParams];
-                }
+        for (AVAssetTrack *track in audioTracks) {
+            AVMutableAudioMixInputParameters *audioInputParams =[AVMutableAudioMixInputParameters audioMixInputParameters];
+            [audioInputParams setVolume:volumeControl atTime:kCMTimeZero];
+            [audioInputParams setTrackID:[track trackID]];
+            [allAudioParams addObject:audioInputParams];
+        }
         AVMutableAudioMix *audioZeroMix = [AVMutableAudioMix audioMix];
         [audioZeroMix setInputParameters:allAudioParams];
-    
+        
         [[_player currentItem] setAudioMix:audioZeroMix];
     }
     
@@ -228,28 +228,28 @@ static SyncPlayerPlugin *getInstance = NULL;
 
 // For Volume Decrese
 -(void)setValumeDOWN:(float)volume{
- 
+    
     if (volumeControl > 0.1){
-         volumeControl=volumeControl-volume;
-         NSURL * url = [[NSBundle mainBundle] URLForResource:[[self getMediaFilesList] objectAtIndex:_currentSongIndex] withExtension:@"mp3"];
-    
-         AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
-         NSArray *audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
-    
-         NSMutableArray *allAudioParams = [NSMutableArray array];
-         
-                for (AVAssetTrack *track in audioTracks) {
-                    AVMutableAudioMixInputParameters *audioInputParams =[AVMutableAudioMixInputParameters audioMixInputParameters];
-                    [audioInputParams setVolume:volumeControl atTime:kCMTimeZero];
-                    [audioInputParams setTrackID:[track trackID]];
-                    [allAudioParams addObject:audioInputParams];
-                }
-         
-         AVMutableAudioMix *audioZeroMix = [AVMutableAudioMix audioMix];
-         [audioZeroMix setInputParameters:allAudioParams];
-         [[_player currentItem] setAudioMix:audioZeroMix];
-
-     }
+        volumeControl=volumeControl-volume;
+        NSURL * url = [[NSBundle mainBundle] URLForResource:[[self getMediaFilesList] objectAtIndex:_currentSongIndex] withExtension:@"mp3"];
+        
+        AVURLAsset *asset = [AVURLAsset URLAssetWithURL:url options:nil];
+        NSArray *audioTracks = [asset tracksWithMediaType:AVMediaTypeAudio];
+        
+        NSMutableArray *allAudioParams = [NSMutableArray array];
+        
+        for (AVAssetTrack *track in audioTracks) {
+            AVMutableAudioMixInputParameters *audioInputParams =[AVMutableAudioMixInputParameters audioMixInputParameters];
+            [audioInputParams setVolume:volumeControl atTime:kCMTimeZero];
+            [audioInputParams setTrackID:[track trackID]];
+            [allAudioParams addObject:audioInputParams];
+        }
+        
+        AVMutableAudioMix *audioZeroMix = [AVMutableAudioMix audioMix];
+        [audioZeroMix setInputParameters:allAudioParams];
+        [[_player currentItem] setAudioMix:audioZeroMix];
+        
+    }
 }
 
 

@@ -419,4 +419,20 @@ static NSString *xmppSearchServer;
     }
     return nil;
 }
+
++ (NSString *)fileNameFromFilePath:(NSString *)filePath{
+    //NSString *url = filePath;
+    NSArray *parts = [filePath componentsSeparatedByString:@"/"];
+    NSString *filename = [parts objectAtIndex:[parts count]-1];
+    return filename;
+}
+
++ (NSString *)mimeType:(NSString *)fileName{
+    CFStringRef fileExtension = (__bridge CFStringRef)[ESSHelper mediaType:fileName];
+    CFStringRef UTI = UTTypeCreatePreferredIdentifierForTag(kUTTagClassFilenameExtension, fileExtension, NULL);
+    CFStringRef MIMEType = UTTypeCopyPreferredTagWithClass(UTI, kUTTagClassMIMEType);
+    CFRelease(UTI);
+    NSString *MIMETypeString = (__bridge_transfer NSString *)MIMEType;
+    return MIMETypeString;
+}
 @end

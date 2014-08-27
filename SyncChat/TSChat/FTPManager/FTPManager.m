@@ -121,7 +121,12 @@ enum {
     
     assert(filePath != nil);
     assert([[NSFileManager defaultManager] fileExistsAtPath:filePath]);
-    assert( [filePath.pathExtension isEqual:@"png"] || [filePath.pathExtension isEqual:@"jpg"] );
+    assert([filePath.pathExtension isEqual:@"png"]||
+           [filePath.pathExtension isEqual:@"jpg"]||
+           [filePath.pathExtension isEqual:@"mp3"]||
+           [filePath.pathExtension isEqual:@"mp4"]||
+           [filePath.pathExtension isEqual:@"m4v"]||
+           [filePath.pathExtension isEqual:@"m4a"]);
     
     assert(self.networkStream == nil);      // don't tap send twice in a row!
     assert(self.fileStream == nil);         // ditto
